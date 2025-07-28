@@ -1,23 +1,27 @@
-import { useState, useEffect } from 'react';
-import Header from './components/Header';
-import JobForm from './components/JobForm';
-import DistributionTable from './components/DistributionTable';
-import JobHistory from './components/JobHistory';
-import Dashboard from './components/Dashboard';
-import Login from './components/Login';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { JobRecord, FormData } from './types';
-import jobService, { JobFormData } from './services/jobService';
+import { useState, useEffect } from "react";
+import Header from "./components/Header";
+import JobForm from "./components/JobForm";
+import DistributionTable from "./components/DistributionTable";
+import JobHistory from "./components/JobHistory";
+import Dashboard from "./components/Dashboard";
+import Login from "./components/Login";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { JobRecord, FormData } from "./types";
+import jobService, { JobFormData } from "./services/jobService";
 
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
   const [jobs, setJobs] = useState<JobRecord[]>([]);
   const [currentJob, setCurrentJob] = useState<JobRecord | null>(null);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'new' | 'history'>('dashboard');
+  const [activeTab, setActiveTab] = useState<"dashboard" | "new" | "history">(
+    "dashboard"
+  );
   const [isLoadingJobs, setIsLoadingJobs] = useState(false);
-  const [nameSuggestions, setNameSuggestions] = useState<{ projectNames: string[]; developerNames: string[] }>({ projectNames: [], developerNames: [] });
+  const [nameSuggestions, setNameSuggestions] = useState<{
+    projectNames: string[];
+    developerNames: string[];
+  }>({ projectNames: [], developerNames: [] });
 
-  // Load jobs from backend when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       loadJobs();
@@ -33,7 +37,7 @@ function AppContent() {
         setJobs(response.data.jobs);
       }
     } catch (error) {
-      console.error('Failed to load jobs:', error);
+      console.error("Failed to load jobs:", error);
     } finally {
       setIsLoadingJobs(false);
     }
@@ -46,7 +50,7 @@ function AppContent() {
         setNameSuggestions(response.data);
       }
     } catch (error) {
-      console.error('Failed to load name suggestions:', error);
+      console.error("Failed to load name suggestions:", error);
     }
   };
 
@@ -56,7 +60,11 @@ function AppContent() {
         projectName: formData.projectName,
         paymentAmount: parseFloat(formData.paymentAmount),
         conversionRate: parseFloat(formData.conversionRate),
-        frequency: formData.frequency as 'One-time' | 'Weekly' | 'Bi-weekly' | 'Monthly',
+        frequency: formData.frequency as
+          | "One-time"
+          | "Weekly"
+          | "Bi-weekly"
+          | "Monthly",
         workingDev: formData.workingDev,
         communicatingDev: formData.communicatingDev || formData.workingDev,
         jobHunter: formData.jobHunter || formData.workingDev,
@@ -67,35 +75,37 @@ function AppContent() {
         const newJob = response.data;
         setJobs([newJob, ...jobs]);
         setCurrentJob(newJob);
-        setActiveTab('new');
+        setActiveTab("new");
         // Refresh name suggestions
         loadNameSuggestions();
       }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create job';
-      console.error('Failed to create job:', error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create job";
+      console.error("Failed to create job:", error);
       alert(errorMessage);
     }
   };
 
   const handleViewJob = (job: JobRecord) => {
     setCurrentJob(job);
-    setActiveTab('new');
+    setActiveTab("new");
   };
 
   const handleDeleteJob = async (jobId: string) => {
-    if (confirm('Are you sure you want to delete this job record?')) {
+    if (confirm("Are you sure you want to delete this job record?")) {
       try {
         const response = await jobService.deleteJob(jobId);
         if (response.success) {
-          setJobs(jobs.filter(job => job.id !== jobId));
+          setJobs(jobs.filter((job) => job.id !== jobId));
           if (currentJob?.id === jobId) {
             setCurrentJob(null);
           }
         }
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Failed to delete job';
-        console.error('Failed to delete job:', error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to delete job";
+        console.error("Failed to delete job:", error);
         alert(errorMessage);
       }
     }
@@ -103,16 +113,53 @@ function AppContent() {
 
   const handleExport = (job: JobRecord) => {
     const csvData = [
-      ['Project', 'Role', 'Person', 'USD Amount', 'PKR Amount', 'Percentage'],
-      ['Developer Share', 'Working Developer', job.workingDev, job.distribution.workingDev, job.distribution.workingDev * job.conversionRate, `${((job.distribution.workingDev / job.paymentAmount) * 100).toFixed(1)}%`],
-      ...(job.distribution.jobHunter > 0 ? [['Job Hunter Fee', 'Job Hunter', job.jobHunter, job.distribution.jobHunter, job.distribution.jobHunter * job.conversionRate, `${((job.distribution.jobHunter / job.paymentAmount) * 100).toFixed(1)}%`]] : []),
-      ...(job.distribution.communicatingDev > 0 ? [['Communication Fee', 'Communicator', job.communicatingDev, job.distribution.communicatingDev, job.distribution.communicatingDev * job.conversionRate, `${((job.distribution.communicatingDev / job.paymentAmount) * 100).toFixed(1)}%`]] : []),
+      ["Project", "Role", "Person", "USD Amount", "PKR Amount", "Percentage"],
+      [
+        "Developer Share",
+        "Working Developer",
+        job.workingDev,
+        job.distribution.workingDev,
+        job.distribution.workingDev * job.conversionRate,
+        `${((job.distribution.workingDev / job.paymentAmount) * 100).toFixed(
+          1
+        )}%`,
+      ],
+      ...(job.distribution.jobHunter > 0
+        ? [
+            [
+              "Job Hunter Fee",
+              "Job Hunter",
+              job.jobHunter,
+              job.distribution.jobHunter,
+              job.distribution.jobHunter * job.conversionRate,
+              `${(
+                (job.distribution.jobHunter / job.paymentAmount) *
+                100
+              ).toFixed(1)}%`,
+            ],
+          ]
+        : []),
+      ...(job.distribution.communicatingDev > 0
+        ? [
+            [
+              "Communication Fee",
+              "Communicator",
+              job.communicatingDev,
+              job.distribution.communicatingDev,
+              job.distribution.communicatingDev * job.conversionRate,
+              `${(
+                (job.distribution.communicatingDev / job.paymentAmount) *
+                100
+              ).toFixed(1)}%`,
+            ],
+          ]
+        : []),
     ];
 
-    const csvContent = csvData.map(row => row.join(',')).join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const csvContent = csvData.map((row) => row.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `${job.projectName}_distribution.csv`;
     a.click();
@@ -122,8 +169,18 @@ function AppContent() {
   const handleShare = (job: JobRecord) => {
     const shareText = `Payment Distribution for ${job.projectName}:
 ${job.workingDev}: $${job.distribution.workingDev.toFixed(2)}
-${job.distribution.jobHunter > 0 ? `${job.jobHunter}: $${job.distribution.jobHunter.toFixed(2)}` : ''}
-${job.distribution.communicatingDev > 0 ? `${job.communicatingDev}: $${job.distribution.communicatingDev.toFixed(2)}` : ''}
+${
+  job.distribution.jobHunter > 0
+    ? `${job.jobHunter}: $${job.distribution.jobHunter.toFixed(2)}`
+    : ""
+}
+${
+  job.distribution.communicatingDev > 0
+    ? `${job.communicatingDev}: $${job.distribution.communicatingDev.toFixed(
+        2
+      )}`
+    : ""
+}
 Total: $${job.paymentAmount}`;
 
     if (navigator.share) {
@@ -133,23 +190,25 @@ Total: $${job.paymentAmount}`;
       });
     } else {
       navigator.clipboard.writeText(shareText);
-      alert('Distribution details copied to clipboard!');
+      alert("Distribution details copied to clipboard!");
     }
   };
 
   const savedNames = [
     ...(nameSuggestions?.developerNames || []),
-    ...Array.from(new Set([
-      ...jobs.map(job => job.workingDev),
-      ...jobs.map(job => job.jobHunter),
-      ...jobs.map(job => job.communicatingDev),
-    ])).filter(name => name && name.trim() !== '')
+    ...Array.from(
+      new Set([
+        ...jobs.map((job) => job.workingDev),
+        ...jobs.map((job) => job.jobHunter),
+        ...jobs.map((job) => job.communicatingDev),
+      ])
+    ).filter((name) => name && name.trim() !== ""),
   ];
 
   const tabs = [
-    { id: 'dashboard', label: 'Dashboard', show: jobs.length > 0 },
-    { id: 'new', label: 'New Job' },
-    { id: 'history', label: 'History', show: jobs.length > 0 },
+    { id: "dashboard", label: "Dashboard", show: jobs.length > 0 },
+    { id: "new", label: "New Job" },
+    { id: "history", label: "History", show: jobs.length > 0 },
   ];
 
   if (isLoading) {
@@ -170,7 +229,7 @@ Total: $${job.paymentAmount}`;
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Loading indicator */}
         {isLoadingJobs && (
@@ -182,38 +241,42 @@ Total: $${job.paymentAmount}`;
 
         {/* Navigation Tabs */}
         <div className="flex space-x-1 mb-8 bg-white p-1 rounded-lg shadow-sm">
-          {tabs.filter(tab => tab.show !== false).map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as 'dashboard' | 'new' | 'history')}
-              className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                activeTab === tab.id
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+          {tabs
+            .filter((tab) => tab.show !== false)
+            .map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() =>
+                  setActiveTab(tab.id as "dashboard" | "new" | "history")
+                }
+                className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  activeTab === tab.id
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
         </div>
 
         {/* Tab Content */}
-        {activeTab === 'dashboard' && <Dashboard jobs={jobs} />}
-        
-        {activeTab === 'new' && (
+        {activeTab === "dashboard" && <Dashboard jobs={jobs} />}
+
+        {activeTab === "new" && (
           <div>
             <JobForm onSubmit={handleJobSubmit} savedNames={savedNames} />
-            <DistributionTable 
-              job={currentJob} 
+            <DistributionTable
+              job={currentJob}
               onExport={handleExport}
               onShare={handleShare}
             />
           </div>
         )}
-        
-        {activeTab === 'history' && (
-          <JobHistory 
-            jobs={jobs} 
+
+        {activeTab === "history" && (
+          <JobHistory
+            jobs={jobs}
             onViewJob={handleViewJob}
             onDeleteJob={handleDeleteJob}
           />
