@@ -20,9 +20,10 @@ export interface JobRecord {
   jobHunter: string;
   workingDev: string;
   distribution: {
-    communicatingDev: number;
-    jobHunter: number;
+    company: number;
     workingDev: number;
+    jobHunter: number;
+    communicator: number;
   };
   createdAt: string;
   updatedAt?: string;

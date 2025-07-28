@@ -5,12 +5,16 @@ import DistributionTable from "./components/DistributionTable";
 import JobHistory from "./components/JobHistory";
 import Dashboard from "./components/Dashboard";
 import Login from "./components/Login";
+import Dialog from "./components/Dialog";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { JobRecord, FormData } from "./types";
 import jobService, { JobFormData } from "./services/jobService";
+import { useDialog } from "./hooks/useDialog";
 
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
+  const { dialogState, hideDialog, showError, showSuccess, showConfirm } =
+    useDialog();
   const [jobs, setJobs] = useState<JobRecord[]>([]);
   const [currentJob, setCurrentJob] = useState<JobRecord | null>(null);
   const [activeTab, setActiveTab] = useState<"dashboard" | "new" | "history">(
@@ -22,6 +26,7 @@ function AppContent() {
     developerNames: string[];
   }>({ projectNames: [], developerNames: [] });
 
+  // Load jobs from backend when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       loadJobs();
@@ -83,7 +88,7 @@ function AppContent() {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to create job";
       console.error("Failed to create job:", error);
-      alert(errorMessage);
+      showError("Error Creating Job", errorMessage);
     }
   };
 
@@ -93,22 +98,27 @@ function AppContent() {
   };
 
   const handleDeleteJob = async (jobId: string) => {
-    if (confirm("Are you sure you want to delete this job record?")) {
-      try {
-        const response = await jobService.deleteJob(jobId);
-        if (response.success) {
-          setJobs(jobs.filter((job) => job.id !== jobId));
-          if (currentJob?.id === jobId) {
-            setCurrentJob(null);
+    showConfirm(
+      "Delete Job",
+      "Are you sure you want to delete this job record? This action cannot be undone.",
+      async () => {
+        try {
+          const response = await jobService.deleteJob(jobId);
+          if (response.success) {
+            setJobs(jobs.filter((job) => job.id !== jobId));
+            if (currentJob?.id === jobId) {
+              setCurrentJob(null);
+            }
+            showSuccess("Success", "Job deleted successfully!");
           }
+        } catch (error: unknown) {
+          const errorMessage =
+            error instanceof Error ? error.message : "Failed to delete job";
+          console.error("Failed to delete job:", error);
+          showError("Error Deleting Job", errorMessage);
         }
-      } catch (error: unknown) {
-        const errorMessage =
-          error instanceof Error ? error.message : "Failed to delete job";
-        console.error("Failed to delete job:", error);
-        alert(errorMessage);
       }
-    }
+    );
   };
 
   const handleExport = (job: JobRecord) => {
@@ -139,16 +149,16 @@ function AppContent() {
             ],
           ]
         : []),
-      ...(job.distribution.communicatingDev > 0
+      ...(job.distribution.communicator > 0
         ? [
             [
               "Communication Fee",
               "Communicator",
               job.communicatingDev,
-              job.distribution.communicatingDev,
-              job.distribution.communicatingDev * job.conversionRate,
+              job.distribution.communicator,
+              job.distribution.communicator * job.conversionRate,
               `${(
-                (job.distribution.communicatingDev / job.paymentAmount) *
+                (job.distribution.communicator / job.paymentAmount) *
                 100
               ).toFixed(1)}%`,
             ],
@@ -175,10 +185,8 @@ ${
     : ""
 }
 ${
-  job.distribution.communicatingDev > 0
-    ? `${job.communicatingDev}: $${job.distribution.communicatingDev.toFixed(
-        2
-      )}`
+  job.distribution.communicator > 0
+    ? `${job.communicatingDev}: $${job.distribution.communicator.toFixed(2)}`
     : ""
 }
 Total: $${job.paymentAmount}`;
@@ -190,7 +198,7 @@ Total: $${job.paymentAmount}`;
       });
     } else {
       navigator.clipboard.writeText(shareText);
-      alert("Distribution details copied to clipboard!");
+      showSuccess("Success", "Distribution details copied to clipboard!");
     }
   };
 
@@ -282,6 +290,20 @@ Total: $${job.paymentAmount}`;
           />
         )}
       </main>
+
+      {/* Dialog Component */}
+      <Dialog
+        isOpen={dialogState.isOpen}
+        onClose={hideDialog}
+        title={dialogState.title}
+        message={dialogState.message}
+        type={dialogState.type}
+        confirmText={dialogState.confirmText}
+        cancelText={dialogState.cancelText}
+        onConfirm={dialogState.onConfirm}
+        onCancel={dialogState.onCancel}
+        showCancel={dialogState.showCancel}
+      />
     </div>
   );
 }

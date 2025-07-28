@@ -28,7 +28,7 @@ router.post(
       const { email, password } = req.body;
 
       // Only allow admin user to login
-      const ADMIN_EMAIL = "artilectsolutions@gmail.com";
+      const ADMIN_EMAIL = "artilectsolutions2024@gmail.com";
       const ADMIN_PASSWORD = "Passpass@123";
 
       if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {

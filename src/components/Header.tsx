@@ -1,14 +1,21 @@
 import React from 'react';
 import { Calculator, TrendingUp, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useDialog } from '../hooks/useDialog';
+import Dialog from './Dialog';
 
 const Header: React.FC = () => {
   const { logout, user } = useAuth();
+  const { dialogState, hideDialog, showConfirm } = useDialog();
 
   const handleLogout = async () => {
-    if (confirm('Are you sure you want to logout?')) {
-      await logout();
-    }
+    showConfirm(
+      'Logout',
+      'Are you sure you want to logout? You will need to sign in again to access your data.',
+      async () => {
+        await logout();
+      }
+    );
   };
 
   return (
@@ -47,6 +54,20 @@ const Header: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Dialog Component */}
+      <Dialog
+        isOpen={dialogState.isOpen}
+        onClose={hideDialog}
+        title={dialogState.title}
+        message={dialogState.message}
+        type={dialogState.type}
+        confirmText={dialogState.confirmText}
+        cancelText={dialogState.cancelText}
+        onConfirm={dialogState.onConfirm}
+        onCancel={dialogState.onCancel}
+        showCancel={dialogState.showCancel}
+      />
     </header>
   );
 };
