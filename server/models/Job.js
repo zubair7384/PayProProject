@@ -67,7 +67,28 @@ const jobSchema = new mongoose.Schema({
   distribution: {
     type: distributionSchema,
     required: true
-  }
+  },
+  internsInfo: [{
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    amount: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    type: {
+      type: String,
+      required: true,
+      enum: ['fixed', 'percentage']
+    },
+    pkrAmount: {
+      type: Number,
+      min: 0
+    }
+  }]
 }, {
   timestamps: true
 });

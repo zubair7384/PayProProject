@@ -36,6 +36,21 @@ const DistributionTable: React.FC<DistributionTableProps> = ({
 
   const pkrAmount = actualJob.paymentAmount * actualJob.conversionRate;
 
+  // Check if this is an advanced policy job with interns
+  interface InternInfo {
+    name: string;
+    amount: number;
+    type: string;
+    pkrAmount?: number;
+  }
+  
+  const jobWithInterns = actualJob as JobRecord & { internsInfo?: InternInfo[] };
+  console.log('DistributionTable - actualJob:', actualJob);
+  console.log('DistributionTable - jobWithInterns.internsInfo:', jobWithInterns.internsInfo);
+  const hasInterns = jobWithInterns.internsInfo && jobWithInterns.internsInfo.length > 0;
+  const internsInfo: InternInfo[] = hasInterns ? jobWithInterns.internsInfo! : [];
+  console.log('DistributionTable - hasInterns:', hasInterns, 'internsInfo:', internsInfo);
+
   const distributionItems = [
     {
       label: "Company Share",
@@ -86,6 +101,17 @@ const DistributionTable: React.FC<DistributionTableProps> = ({
           },
         ]
       : []),
+    // Add intern rows for advanced policy
+    ...internsInfo.map((intern, index: number) => ({
+      label: `Intern Payment`,
+      usd: intern.amount, // Always USD amount for calculations
+      pkr: intern.pkrAmount || (intern.amount * actualJob.conversionRate), // Use stored PKR amount or calculate
+      percentage: `${((intern.amount / actualJob.paymentAmount) * 100).toFixed(1)}%`,
+      color: index === 0 ? "bg-indigo-400" : index === 1 ? "bg-indigo-500" : "bg-indigo-600", // Different shades for multiple interns
+      person: intern.name,
+      isIntern: true,
+      internType: intern.type,
+    })),
   ];
 
   return (

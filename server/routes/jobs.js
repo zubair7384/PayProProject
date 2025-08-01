@@ -157,6 +157,33 @@ router.post('/', authenticate, validateJob, handleValidationErrors, async (req, 
       userId: req.user._id
     };
 
+    // Handle advanced policy intern data
+    if (jobData.advancedPolicy && jobData.advancedPolicy.interns) {
+      // Extract intern information from advanced policy data
+      const conversionRate = parseFloat(jobData.conversionRate) || 278;
+      jobData.internsInfo = jobData.advancedPolicy.interns.map(intern => {
+        if (intern.type === 'fixed') {
+          // For fixed amounts, intern.amount is in PKR, need to convert to USD
+          const pkrAmount = intern.amount;
+          const usdAmount = pkrAmount / conversionRate;
+          return {
+            name: intern.name,
+            amount: usdAmount, // Store USD amount for calculations
+            type: intern.type,
+            pkrAmount: pkrAmount // Store original PKR amount
+          };
+        } else {
+          // For percentage, amount is already calculated in USD
+          return {
+            name: intern.name,
+            amount: intern.amount,
+            type: intern.type,
+            pkrAmount: intern.amount * conversionRate
+          };
+        }
+      });
+    }
+
     // Calculate distribution
     const distribution = calculateDistribution(jobData);
     jobData.distribution = distribution;

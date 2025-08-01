@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import connectDB from "./config/database.js";
 import authRoutes from "./routes/auth.js";
 import jobRoutes from "./routes/jobs.js";
+import advancedPoliciesRoutes from "./routes/advancedPolicies.js";
 
 // Load environment variables
 dotenv.config();
@@ -55,6 +56,7 @@ app.get("/health", (req, res) => {
 // API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
+app.use("/api/advanced-policies", advancedPoliciesRoutes);
 
 // 404 handler
 app.use("*", (req, res) => {

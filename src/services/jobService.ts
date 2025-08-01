@@ -8,6 +8,19 @@ export interface JobFormData {
   workingDev: string;
   communicatingDev?: string;
   jobHunter?: string;
+  advancedPolicy?: {
+    companyPercentage: number;
+    developerPercentage: number;
+    jobHunterPercentage: number;
+    communicatorPercentage: number;
+    interns: Array<{
+      id: string;
+      name: string;
+      type: 'fixed' | 'percentage';
+      amount: number;
+      percentage: number;
+    }>;
+  };
 }
 
 export interface JobRecord {
