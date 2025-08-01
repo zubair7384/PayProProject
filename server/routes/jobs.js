@@ -122,6 +122,14 @@ router.get('/stats', authenticate, async (req, res) => {
 // @access  Private
 router.get('/:id', authenticate, async (req, res) => {
   try {
+    // Handle legacy suggestions requests
+    if (req.params.id === 'suggestions') {
+      return res.status(404).json({
+        success: false,
+        message: 'Endpoint moved to /api/jobs/names/suggestions'
+      });
+    }
+
     const job = await Job.findOne({
       _id: req.params.id,
       userId: req.user._id

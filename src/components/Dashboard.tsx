@@ -5,9 +5,12 @@ import { formatCurrency } from '../utils/calculations';
 
 interface DashboardProps {
   jobs: JobRecord[];
+  onNewJob: () => void;
+  onViewHistory: () => void;
+  isLoading: boolean;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ jobs }) => {
+const Dashboard: React.FC<DashboardProps> = ({ jobs, onNewJob, onViewHistory, isLoading }) => {
   if (jobs.length === 0) return null;
 
   const totalRevenue = jobs.reduce((sum, job) => sum + job.paymentAmount, 0);
@@ -52,6 +55,25 @@ const Dashboard: React.FC<DashboardProps> = ({ jobs }) => {
 
   return (
     <div className="mb-8">
+      {/* Navigation Buttons */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <div className="flex space-x-4">
+          <button
+            onClick={onNewJob}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
+            Create New Job
+          </button>
+          <button
+            onClick={onViewHistory}
+            className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+          >
+            View History
+          </button>
+        </div>
+      </div>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {stats.map((stat, index) => (
           <div key={index} className="bg-white rounded-xl shadow-lg p-6">

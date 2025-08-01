@@ -120,8 +120,18 @@ class JobService {
 
   // Get name suggestions for autocomplete
   async getNameSuggestions(): Promise<NameSuggestionsResponse> {
-    const response = await api.get('/jobs/names/suggestions');
-    return response.data;
+    try {
+      const response = await api.get('/jobs/names/suggestions');
+      return response.data;
+    } catch (error) {
+      console.error('Get name suggestions error:', error);
+      throw error;
+    }
+  }
+
+  // Alias for getJob for consistency
+  async getJobById(id: string): Promise<{ success: boolean; data: JobRecord }> {
+    return this.getJob(id);
   }
 }
 

@@ -1,26 +1,36 @@
-import React, { useState } from 'react';
-import { History, Search, Filter, Calendar, DollarSign, Users, Trash2 } from 'lucide-react';
-import { JobRecord } from '../types';
-import { formatCurrency } from '../utils/calculations';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  History,
+  Search,
+  Filter,
+  Calendar,
+  DollarSign,
+  Trash2,
+} from "lucide-react";
+import { JobRecord } from "../types";
+import { formatCurrency } from "../utils/calculations";
 
 interface JobHistoryProps {
   jobs: JobRecord[];
-  onViewJob: (job: JobRecord) => void;
   onDeleteJob: (jobId: string) => void;
 }
 
-const JobHistory: React.FC<JobHistoryProps> = ({ jobs, onViewJob, onDeleteJob }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedFrequency, setSelectedFrequency] = useState<string>('All');
+const JobHistory: React.FC<JobHistoryProps> = ({ jobs, onDeleteJob }) => {
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedFrequency, setSelectedFrequency] = useState<string>("All");
 
-  const filteredJobs = jobs.filter(job => {
-    const matchesSearch = job.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.workingDev.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.jobHunter.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.communicatingDev.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesFrequency = selectedFrequency === 'All' || job.frequency === selectedFrequency;
-    
+  const filteredJobs = jobs.filter((job) => {
+    const matchesSearch =
+      job.projectName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.workingDev.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.jobHunter.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.communicatingDev.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesFrequency =
+      selectedFrequency === "All" || job.frequency === selectedFrequency;
+
     return matchesSearch && matchesFrequency;
   });
 
@@ -31,8 +41,12 @@ const JobHistory: React.FC<JobHistoryProps> = ({ jobs, onViewJob, onDeleteJob })
     return (
       <div className="bg-white rounded-xl shadow-lg p-8 text-center">
         <History className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">No Job History</h3>
-        <p className="text-gray-600">Start by adding your first job to see the distribution history here.</p>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          No Job History
+        </h3>
+        <p className="text-gray-600">
+          Start by adding your first job to see the distribution history here.
+        </p>
       </div>
     );
   }
@@ -45,7 +59,7 @@ const JobHistory: React.FC<JobHistoryProps> = ({ jobs, onViewJob, onDeleteJob })
           <h3 className="text-xl font-semibold text-gray-900">Job History</h3>
         </div>
         <div className="text-sm text-gray-600">
-          {totalJobs} jobs • {formatCurrency(totalEarnings, 'USD')} total
+          {totalJobs} jobs • {formatCurrency(totalEarnings, "USD")} total
         </div>
       </div>
 
@@ -79,10 +93,15 @@ const JobHistory: React.FC<JobHistoryProps> = ({ jobs, onViewJob, onDeleteJob })
       {/* Jobs List */}
       <div className="space-y-4">
         {filteredJobs.map((job) => (
-          <div key={job.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+          <div
+            key={job.id}
+            className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+          >
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h4 className="font-semibold text-gray-900">{job.projectName}</h4>
+                <h4 className="font-semibold text-gray-900">
+                  {job.projectName}
+                </h4>
                 <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
                   <div className="flex items-center space-x-1">
                     <Calendar className="h-4 w-4" />
@@ -90,7 +109,7 @@ const JobHistory: React.FC<JobHistoryProps> = ({ jobs, onViewJob, onDeleteJob })
                   </div>
                   <div className="flex items-center space-x-1">
                     <DollarSign className="h-4 w-4" />
-                    <span>{formatCurrency(job.paymentAmount, 'USD')}</span>
+                    <span>{formatCurrency(job.paymentAmount, "USD")}</span>
                   </div>
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
                     {job.frequency}
@@ -99,7 +118,7 @@ const JobHistory: React.FC<JobHistoryProps> = ({ jobs, onViewJob, onDeleteJob })
               </div>
               <div className="flex space-x-2">
                 <button
-                  onClick={() => onViewJob(job)}
+                  onClick={() => navigate(`/${job.id}`)}
                   className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
                 >
                   View Details
@@ -125,16 +144,17 @@ const JobHistory: React.FC<JobHistoryProps> = ({ jobs, onViewJob, onDeleteJob })
                   <p className="font-medium">{job.jobHunter}</p>
                 </div>
               )}
-              {job.communicatingDev && job.communicatingDev !== job.workingDev && (
-                <div>
-                  <span className="text-gray-600">Communicator:</span>
-                  <p className="font-medium">{job.communicatingDev}</p>
-                </div>
-              )}
+              {job.communicatingDev &&
+                job.communicatingDev !== job.workingDev && (
+                  <div>
+                    <span className="text-gray-600">Communicator:</span>
+                    <p className="font-medium">{job.communicatingDev}</p>
+                  </div>
+                )}
               <div>
                 <span className="text-gray-600">Dev Share:</span>
                 <p className="font-medium text-green-600">
-                  {formatCurrency(job.distribution.workingDev, 'USD')}
+                  {formatCurrency(job.distribution.workingDev, "USD")}
                 </p>
               </div>
             </div>
@@ -144,7 +164,9 @@ const JobHistory: React.FC<JobHistoryProps> = ({ jobs, onViewJob, onDeleteJob })
 
       {filteredJobs.length === 0 && searchTerm && (
         <div className="text-center py-8">
-          <p className="text-gray-600">No jobs found matching your search criteria.</p>
+          <p className="text-gray-600">
+            No jobs found matching your search criteria.
+          </p>
         </div>
       )}
     </div>
